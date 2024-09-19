@@ -14,9 +14,16 @@
     <script src="node_modules/js-cookie/dist/js.cookie.min.js"></script>
     <script src="node_modules/keycloak-js/dist/keycloak.min.js"></script>
     <script>
+      function saveRedirectUri() {
 
+      }
+
+      function saveRedirectUri() {
+        
+      }
       // El acceso al OIDC de MVL
       async function initKeycloak() {
+        debugger;
         keycloak = new Keycloak({
             url: "<?=$env['KEYCLOAK_SERVER']?>",
             realm: "<?=$env['KEYCLOAK_REALM']?>",
@@ -24,21 +31,26 @@
             cors: true,
         });
 
+        keycloak.onAuthSuccess = () => console.log('Authenticated!');
+
         isAuthenticated = await keycloak.init({
           checkLoginIframe: false,
         });
         <?php
         if( $env['MODE'] === 'development' ) {
         ?>
-        keycloak.logout();
+        //keycloak.logout();
         <?php
         }
         ?>
-        keycloak.logout();
         if ( !isAuthenticated )
           keycloak.login();
-        else
-            window.location.href = "<?=$env['OK_REDIRECT_URI']?>"
+        else {
+          debugger;
+          const urlParams = new URLSearchParams(window.location.search);
+          const baseGrantURL = urlParams.get('base_grant_url');
+          window.location.href = baseGrantURL ?? "<?=$env['OK_REDIRECT_URI']?>"
+        }
       }
       // El disparador principal
       document.addEventListener("DOMContentLoaded", function(event) { 
